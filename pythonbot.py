@@ -9,12 +9,12 @@ BOT_ID = os.environ.get("BOT_ID")
 
 # constants
 AT_BOT = "<@" + BOT_ID + ">:"
-EXAMPLE_COMMAND = "aww"
+
+# instantiate Reddit/Praw client
+r = praw.Reddit(user_agent='baltimore_python_slack_app')
 
 # instantiate Slack & Twilio clients
 slack_client = SlackClient(os.environ.get('SLACK_BOT_TOKEN'))
-
-r = praw.Reddit(user_agent='baltimore_python_slack_app')
 
 def handle_command(command, channel):
     """
@@ -24,8 +24,8 @@ def handle_command(command, channel):
     """
     response = "Not sure what you mean. Use the *" + EXAMPLE_COMMAND + \
                "* command with numbers, delimited by spaces."
-    if command.find(EXAMPLE_COMMAND) > -1:
-        submission = random.choice(list(r.get_subreddit('aww').get_hot(limit=20)))
+    if "aww" in command:
+        submission = random.choice(list(r.get_subreddit('aww').get_hot(limit=10)))
         slack_client.api_call("chat.postMessage", channel=channel,
                               text=submission.url, as_user=True,
                               icon_emoji=':robot_face:')
@@ -49,7 +49,7 @@ def parse_slack_output(slack_rtm_output):
 if __name__ == "__main__":
     READ_WEBSOCKET_DELAY = 1 # 1 second delay between reading from firehose
     if slack_client.rtm_connect():
-        print("StarterBot connected and running!")
+        print("PythonBot connected and running!")
         while True:
             command, channel = parse_slack_output(slack_client.rtm_read())
             if command and channel:
